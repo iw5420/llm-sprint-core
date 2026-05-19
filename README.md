@@ -1,29 +1,31 @@
-🏛️ LLM Lifecycle Sprint Core (Monorepo)
+# 🏛️ LLM Lifecycle Sprint Core (Monorepo)
 
-84小時進修實作核心倉庫：大模型全生命週期（組態 ➔ 清洗 ➔ 訓練 ➔ 對齊 ➔ 評估 ➔ 觀測）端到端工業級管線。
+> 84小時進修實作核心倉庫：大模型全生命週期（組態 ➔ 清洗 ➔ 訓練 ➔ 對齊 ➔ 評估 ➔ 觀測）端到端工業級管線。
 
-🗺️ 知識庫與實戰日誌對齊 (Obsidian Mapping)
+## 🗺️ 知識庫與實戰日誌對齊 (Obsidian Mapping)
 
 本專案與本地 Obsidian 知識庫之「空間架構線」完全對齊。在 Obsidian 中閱讀時，可透過下方內部連結一鍵跳轉至實戰日誌與開發進度索引：
 
 🧭 實戰日誌導覽進入點： [📂 08_mlops_sprint_logs 實戰日誌首頁](https://github.com/iw5420/ace-obsidian-vault/blob/main/08_mlops_sprint_logs/_sprint_logs_index.md.md)
-
+    
 
 📝 模組一實戰詳細紀錄： [📄 08.1 模組一：組態與安全驗證日誌](https://github.com/iw5420/ace-obsidian-vault/blob/main/08_mlops_sprint_logs/08.1_mod1_config_%26_safety.md)
+    
 
-🚀 1. 專案核心特色 (Key Features)
+## 🚀 1. 專案核心特色 (Key Features)
 
-本專案採用 Monorepo 單一程式碼庫架構，旨在打破傳統機器學習腳本零散、難以維護的痛點，建立一個具備強型態安全與硬體自適應的自動化 MLOps 系統。
+本專案採用 **Monorepo** 單一程式碼庫架構，旨在打破傳統機器學習腳本零散、難以維護的痛點，建立一個具備強型態安全與硬體自適應的自動化 MLOps 系統。
 
-強型態組態守門員： 結合 Hydra 的階層式配置與 Pydantic v2，在進入高耗能訓練前，對 LoRA 等核心參數進行型態與物理邊界校驗。
+- **強型態組態守門員：** 結合 Hydra 的階層式配置與 Pydantic v2，在進入高耗能訓練前，對 LoRA 等核心參數進行型態與物理邊界校驗。
+    
+- **執行期硬體自我感知：** 自動辨識 Apple Silicon (MPS) 或 NVIDIA (CUDA) 加速晶片，並鎖定最佳 CPU 實體核心數，杜絕執行緒過度爭搶。
+    
+- **端到端全生命週期：** 涵蓋從最上游的海量數據去重、Packing 打包、手寫 PyTorch 訓練迴圈、DPO 偏好對齊，到最下游的非同步 LLM 盲測與自動化驗證。
+    
 
-執行期硬體自我感知： 自動辨識 Apple Silicon (MPS) 或 NVIDIA (CUDA) 加速晶片，並鎖定最佳 CPU 實體核心數，杜絕執行緒過度爭搶。
+## 📂 2. 專案拓撲結構 (Topology)
 
-端到端全生命週期： 涵蓋從最上游的海量數據去重、Packing 打包、手寫 PyTorch 訓練迴圈、DPO 偏好對齊，到最下游的非同步 LLM 盲測與自動化驗證。
-
-📂 2. 專案拓撲結構 (Topology)
-
-```text
+```
 llm-sprint-core/
 ├── config/                  # [模組一] 階層式組態目錄 (YAML)
 │   ├── config.yaml          # 全局基礎組態
@@ -42,92 +44,100 @@ llm-sprint-core/
 └── requirements.txt         # 統一的外部生態系依賴鎖定
 ```
 
-⚙️ 3. 快速開始與安裝 (Installation)
+## ⚙️ 3. 快速開始與安裝 (Installation)
 
-3.1 開發環境建置
+### 3.1 開發環境建置
 
 本專案建議使用 Python 3.10 以上之環境。請在乾淨的虛擬環境中執行以下指令安裝核心依賴：
 
+```
 pip install -r requirements.txt
+```
 
-
-3.2 執行環境自我檢查 (Sanity Check)
+### 3.2 執行環境自我檢查 (Sanity Check)
 
 在啟動程序前，可透過以下指令快速驗證本地 PyTorch 加速晶片與系統核心狀態：
 
+```
 python -c "import torch, psutil; print('--- Hardware Status ---'); print('MPS Available:', torch.backends.mps.is_available()); print('Physical Cores:', psutil.cpu_count(logical=False))"
+```
 
+### 3.3 執行組態核心
 
-3.3 執行組態核心
+執行 `main.py` 以啟動 Hydra 階層組態解析並通過 Pydantic 的安全防禦閘門：
 
-執行 main.py 以啟動 Hydra 階層組態解析並通過 Pydantic 的安全防禦閘門：
-
+```
 python main.py
-
+```
 
 若欲在命令列中動態覆蓋超參數進行實驗，可直接追加引數（無需修改 YAML 實體檔案）：
 
+```
 python main.py hparams.lr=1e-4 hparams.r=16
+```
 
+## 🗺️ 4. 7大實作模組藍圖 (Roadmap)
 
-🗺️ 4. 7大實作模組藍圖 (Roadmap)
+本專案隨著 84 小時衝刺進度，依序將以下 7 大核心模組落實於 `src/` 中：
 
-本專案隨著 84 小時衝刺進度，依序將以下 7 大核心模組落實於 src/ 中：
+1. **模組一：動態組態與型態安全架構 (Done)**
+    
+    - 實作 Hydra 階層 YAML 覆蓋、Pydantic v2 BaseSettings 超參數邊界防禦與 Apple Silicon 執行期實體執行緒限制。
+        
+2. **模組二：多核心加速 Data Curation 管道**
+    
+    - 使用 Python 多處理器並行洗滌文本，並實作手寫 MinHash + LSH 百萬級海量數據去重。
+        
+3. **模組三：非同步自動化基準測試引擎**
+    
+    - 使用 Python `asyncio` 實作非同步高併發外部 LLM-as-a-Judge 盲測與自動化 Markdown 差異報告導出。
+        
+4. **模組四：手寫 PyTorch + MPS 訓練迴圈**
+    
+    - 捨棄高階訓練器，自定義客製化 Training Loop，實作梯度累積 (Gradient Accumulation) 與 LoRA 權重 Merge 邏輯。
+        
+5. **模組五：DPO 數據管道與損失函數實作**
+    
+    - 偏好數據結構校驗，純手寫 $L_{DPO}$ 損失函數與矩陣對數機率運算。
+        
+6. **模組六：Continued Pre-Training 大文本吞吐**
+    
+    - 手寫工業級 Packing 打包演算法消除 Padding 浪費，並整合 `IterableDataset` 實作 Streaming 加載防止記憶體過載。
+        
+7. **模組七：工業級 MLOps 觀測與自動化驗證**
+    
+    - 手寫迴圈原生對接 WandB 指標追蹤，並撰寫一鍵式端到端生命週期整合測試 (`test_e2e_lifecycle.py`)。
+        
 
-模組一：動態組態與型態安全架構 (Done)
+## 🛡️ 5. 邊界破壞與安全攔截驗證 (Destructive Testing & Verification)
 
-實作 Hydra 階層 YAML 覆蓋、Pydantic v2 BaseSettings 超參數邊界防禦與 Apple Silicon 執行期實體執行緒限制。
+為驗證 `src/config/schema.py` 的防禦閘門是否正常運作，可執行以下非正常參數測試：
 
-模組二：多核心加速 Data Curation 管道
+### 5.1 測試異常 LoRA Rank (非 2 的冪次方)
 
-使用 Python 多處理器並行洗滌文本，並實作手寫 MinHash + LSH 百萬級海量數據去重。
-
-模組三：非同步自動化基準測試引擎
-
-使用 Python asyncio 實作非同步高併發外部 LLM-as-a-Judge 盲測與自動化 Markdown 差異報告導出。
-
-模組四：手寫 PyTorch + MPS 訓練迴圈
-
-捨棄高階訓練器，自定義客製化 Training Loop，實作梯度累積 (Gradient Accumulation) 與 LoRA 權重 Merge 邏輯。
-
-模組五：DPO 數據管道與損失函數實作
-
-偏好數據結構校驗，純手寫 $L_{DPO}$ 損失函數與矩陣對數機率運算。
-
-模組六：Continued Pre-Training 大文本吞吐
-
-手寫工業級 Packing 打包演算法消除 Padding 浪費，並整合 IterableDataset 實作 Streaming 加載防止記憶體過載。
-
-模組七：工業級 MLOps 觀測與自動化驗證
-
-手寫迴圈原生對接 WandB 指標追蹤，並撰寫一鍵式端到端生命週期整合測試 (test_e2e_lifecycle.py)。
-
-🛡️ 5. 邊界破壞與安全攔截驗證 (Destructive Testing & Verification)
-
-為驗證 src/config/schema.py 的防禦閘門是否正常運作，可執行以下非正常參數測試：
-
-5.1 測試異常 LoRA Rank (非 2 的冪次方)
-
+```
 # 預期拋出 ValidationError：LoRA Rank 必須為大於 0 的 2 的冪次方
 python main.py hparams.r=7
+```
 
+### 5.2 測試異常學習率 (超出安全限制邊界)
 
-5.2 測試異常學習率 (超出安全限制邊界)
-
+```
 # 預期拋出 ValidationError：學習率 lr 超出安全邊界限制 [1e-6, 1e-2]
 python main.py hparams.lr=0.5
+```
 
-
-🤝 6. 開發規範與品質控制 (Development & Code Quality Standards)
+## 🤝 6. 開發規範與品質控制 (Development & Code Quality Standards)
 
 為了確保 Monorepo 的代碼在多個開發者或自動化 CI/CD 管線中維持一致的高標準，本專案依循以下規範：
 
-代碼風格與排版 (Linting & Formatting)： 統一使用 ruff 進行代碼静態分析與自動格式化，提交代碼前請確保通過 ruff check .。
+- **代碼風格與排版 (Linting & Formatting)：** 統一使用 `ruff` 進行代碼静態分析與自動格式化，提交代碼前請確保通過 `ruff check .`。
+    
+- **靜態型態檢查 (Type Checking)：** 專案全面引進 Python Type Hints，可使用 `mypy src/` 驗證型態一致性，防止隱式 Runtime 錯誤。
+    
+- **單元測試規範 (Testing)：** 新增功能或修復 Bug 時，必須於 `tests/unit/` 中撰寫對應的 `pytest` 測試案例。
+    
 
-靜態型態檢查 (Type Checking)： 專案全面引進 Python Type Hints，可使用 mypy src/ 驗證型態一致性，防止隱式 Runtime 錯誤。
+## 📜 7. 授權許可 (License)
 
-單元測試規範 (Testing)： 新增功能或修復 Bug 時，必須於 tests/unit/ 中撰寫對應的 pytest 測試案例。
-
-📜 7. 授權許可 (License)
-
-本專案採用 MIT License 授權開源。
+本專案採用 [MIT License](https://gemini.google.com/app/LICENSE "null") 授權開源。
