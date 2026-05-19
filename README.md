@@ -36,7 +36,7 @@ llm-sprint-core/
 │   └── utils/               # [模組七] 觀測與 WandB 對接
 ├── tests/                   # 測試套件
 │   ├── unit/                # 各模組獨立單元測試 (pytest)
-│   └── test_e2e_lifecycle.py# [模組七] 全生命週期整合測試
+│   └── test_e2e_lifecycle.py# [模組極] 全生命週期整合測試
 ├── main.py                  # 系統進入點
 └── requirements.txt         # 統一的外部生態系依賴鎖定
 
@@ -100,3 +100,33 @@ python main.py hparams.lr=1e-4 hparams.r=16
 模組七：工業級 MLOps 觀測與自動化驗證
 
 手寫迴圈原生對接 WandB 指標追蹤，並撰寫一鍵式端到端生命週期整合測試 (test_e2e_lifecycle.py)。
+
+🛡️ 5. 邊界破壞與安全攔截驗證 (Destructive Testing & Verification)
+
+為驗證 src/config/schema.py 的防禦閘門是否正常運作，可執行以下非正常參數測試：
+
+5.1 測試異常 LoRA Rank (非 2 的冪次方)
+
+# 預期拋出 ValidationError：LoRA Rank 必須為大於 0 的 2 的冪次方
+python main.py hparams.r=7
+
+
+5.2 測試異常學習率 (超出安全限制邊界)
+
+# 預期拋出 ValidationError：學習率 lr 超出安全邊界限制 [1e-6, 1e-2]
+python main.py hparams.lr=0.5
+
+
+🤝 6. 開發規範與品質控制 (Development & Code Quality Standards)
+
+為了確保 Monorepo 的代碼在多個開發者或自動化 CI/CD 管線中維持一致的高標準，本專案依循以下規範：
+
+代碼風格與排版 (Linting & Formatting)： 統一使用 ruff 進行代碼静態分析與自動格式化，提交代碼前請確保通過 ruff check .。
+
+靜態型態檢查 (Type Checking)： 專案全面引進 Python Type Hints，可使用 mypy src/ 驗證型態一致性，防止隱式 Runtime 錯誤。
+
+單元測試規範 (Testing)： 新增功能或修復 Bug 時，必須於 tests/unit/ 中撰寫對應的 pytest 測試案例。
+
+📜 7. 授權許可 (License)
+
+本專案採用 MIT License 授權開源。
