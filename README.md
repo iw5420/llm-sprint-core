@@ -23,6 +23,7 @@
 
 📂 2. 專案拓撲結構 (Topology)
 
+```text
 llm-sprint-core/
 ├── config/                  # [模組一] 階層式組態目錄 (YAML)
 │   ├── config.yaml          # 全局基礎組態
@@ -39,7 +40,7 @@ llm-sprint-core/
 │   └── test_e2e_lifecycle.py# [模組極] 全生命週期整合測試
 ├── main.py                  # 系統進入點
 └── requirements.txt         # 統一的外部生態系依賴鎖定
-
+```
 
 ⚙️ 3. 快速開始與安裝 (Installation)
 
