@@ -140,4 +140,4 @@ python main.py hparams.lr=0.5
 
 ## 📜 7. 授權許可 (License)
 
-本專案採用 [MIT License](https://gemini.google.com/app/LICENSE "null") 授權開源。
+本專案採用 [MIT License](./LICENSE.txt) 授權開源。
