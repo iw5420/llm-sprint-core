@@ -1,46 +1,102 @@
-🏛️ 專案簡介 (Repository Description)建議填入 GitHub / GitLab 專案設定中的 Description 欄位（控制在 250 字內，精準突顯架構師級別技術棧）：PlaintextProduction-grade LLM Lifecycle Pipeline (Monorepo) featuring Hydra hierarchical configurations, Pydantic v2 type-safe validations, localized hardware-aware thread optimization for Apple Silicon/CUDA, and E2E automation verification.
-📄 專案 README.md 原始碼請在你的專案根目錄下建立 README.md，並將以下內容完整貼入：Markdown# 🏛️ LLM Lifecycle Sprint Core (Monorepo)
+🏛️ LLM Lifecycle Sprint Core (Monorepo)
 
-> 84小時進修實作核心倉：融合 Hydra 階層式組態管理、Pydantic v2 生產級強型態校驗，與多模組端到端（E2E）大模型微調生命周期管線。
+84小時進修實作核心倉庫：大模型全生命週期（組態 ➔ 清洗 ➔ 訓練 ➔ 對齊 ➔ 評估 ➔ 觀測）端到端工業級管線。
 
-[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
-[![Pydantic](https://img.shields.io/badge/Pydantic-V2-red.svg)](https://docs.pydantic.dev/)
-[![Hydra](https://img.shields.io/badge/Hydra-1.3-orange.svg)](https://hydra.cc/)
+🗺️ 知識庫與實戰日誌對齊 (Obsidian Mapping)
 
----
+本專案與本地 Obsidian 知識庫之「空間架構線」完全對齊。在 Obsidian 中閱讀時，可透過下方內部連結一鍵跳轉至實戰日誌與開發進度索引：
 
-## 🗺️ 知識庫與實戰日誌對齊 (Obsidian Mapping)
+🧭 實戰日誌導覽進入點： [📂 08_mlops_sprint_logs 實戰日誌首頁](https://github.com/iw5420/ace-obsidian-vault/blob/main/08_mlops_sprint_logs/_sprint_logs_index.md.md)
 
-本程式碼倉庫（Codebase）與本地 Obsidian 知識庫之「空間架構線」完全對齊。在 Obsidian 中閱讀時，可透過下方連結一鍵跳轉至實戰日誌核心索引：
 
-* **🧭 核心導覽進入點：** `[[_sprint_logs_index.md|📂 08_mlops_sprint_logs 實戰日誌首頁]]`
-* **📄 當前模組實戰紀錄：** `[[08.1_mod1_config_&_safety.md|📝 08.1 模組一組態與安全驗證日誌]]`
+📝 模組一實戰詳細紀錄： [📄 08.1 模組一：組態與安全驗證日誌](https://github.com/iw5420/ace-obsidian-vault/blob/main/08_mlops_sprint_logs/08.1_mod1_config_%26_safety.md)
 
----
+🚀 1. 專案核心特色 (Key Features)
 
-## 🛠️ 1. 專案拓撲結構 (Repository Topology)
+本專案採用 Monorepo 單一程式碼庫架構，旨在打破傳統機器學習腳本零散、難以維護的痛點，建立一個具備強型態安全與硬體自適應的自動化 MLOps 系統。
 
-本專案採用 **Monorepo** 架構開發，以確保組態、數據清洗、訓練迴圈與自動化驗證之間的強型態閉環與連續性。
+強型態組態守門員： 結合 Hydra 的階層式配置與 Pydantic v2，在進入高耗能訓練前，對 LoRA 等核心參數進行型態與物理邊界校驗。
 
-```text
-llm-sprint-core/             # 專案根目錄
-├── config/                  # [模組一] 階層式組態目錄
-│   ├── config.yaml          # 全局基礎組態進入點
-│   ├── env/
-│   │   ├── dev.yaml         # 開發環境覆蓋設定
-│   │   └── prod.yaml        # 生產環境覆蓋設定
-│   └── hparams/
-│       └── ryan_lora.yaml   # LoRA 微調超參數模組
-├── src/                     # 核心生產代碼基底
-│   ├── __init__.py
-│   └── config/              # [模組一] 安全架構與執行期感知
-│       ├── __init__.py
-│       ├── hardware.py      # Runtime 硬體偵測器 (Apple Silicon/CUDA Thread 鎖定)
-│       └── schema.py        # Pydantic v2 強型態驗證守門員
-├── main.py                  # 系統執行進入點
+執行期硬體自我感知： 自動辨識 Apple Silicon (MPS) 或 NVIDIA (CUDA) 加速晶片，並鎖定最佳 CPU 實體核心數，杜絕執行緒過度爭搶。
+
+端到端全生命週期： 涵蓋從最上游的海量數據去重、Packing 打包、手寫 PyTorch 訓練迴圈、DPO 偏好對齊，到最下游的非同步 LLM 盲測與自動化驗證。
+
+📂 2. 專案拓撲結構 (Topology)
+
+llm-sprint-core/
+├── config/                  # [模組一] 階層式組態目錄 (YAML)
+│   ├── config.yaml          # 全局基礎組態
+│   ├── env/                 # 環境覆蓋配置 (dev/prod)
+│   └── hparams/             # 微調與 LoRA 超參數配置
+├── src/                     # 系統核心源碼基底
+│   ├── config/              # [模組一] 組態校驗與硬體偵測
+│   ├── data/                # [模組二、六] 數據清洗與流式載入
+│   ├── evaluation/          # [模組三] 非同步評估引擎
+│   ├── models/              # [模組四、五] 訓練迴圈與損失函數
+│   └── utils/               # [模組七] 觀測與 WandB 對接
+├── tests/                   # 測試套件
+│   ├── unit/                # 各模組獨立單元測試 (pytest)
+│   └── test_e2e_lifecycle.py# [模組七] 全生命週期整合測試
+├── main.py                  # 系統進入點
 └── requirements.txt         # 統一的外部生態系依賴鎖定
-🚀 2. 快速開始 (Quick Start)2.1 環境建置與套件安裝建議在乾淨的虛擬環境（如 conda 或 venv）中執行以下指令，一鍵安裝鎖定版本的生產級依賴：Bashpip install -r requirements.txt
-requirements.txt 內容參考：pydantic==2.10.0 | hydra-core==1.3.2 | omegaconf==2.3.0 | psutil==5.9.8 | torch==2.3.02.2 執行 Runtime 環境驗證在啟動主程序前，可透過以下單行指令對本地的 PyTorch 加速晶片（MPS/CUDA）與實體核心進行自我檢查（Sanity Check）：Bashpython -c "import torch, psutil; print('--- Runtime Check ---'); print('MPS Available:', torch.backends.mps.is_available()); print('Physical Cores:', psutil.cpu_count(logical=False))"
-2.3 啟動組態核心執行 main.py 以啟動 Hydra 階層組態解析並通過 Pydantic 的型態防禦閘門：Bashpython main.py
-若欲在命令列（CLI）中動態覆蓋超參數進行實驗，可直接追加引數（無需修改 YAML 實體檔案）：Bashpython main.py hparams.lr=1e-4 hparams.r=16
-📈 3. 核心模組實作進度表 (Sprint Roadmap)本倉庫將隨著 84 小時衝刺進度，依序將各核心模組代碼內聚至對應的封裝路徑中：模組一：動態組態與型態安全架構 (Done) ➔ 實作 Hydra + Pydantic v2，落實 Apple Silicon M 系列晶片實體效能核（P-cores）Thread 鎖定調配。模組二：Data Curation 數據清洗管線 (In Progress) ➔ 多核心加速與手寫 MinHash + LSH 百萬級文本去重。模組三：非同步評估引擎 ➔ asyncio 併發呼叫與 LLM-as-a-Judge 盲測。模組四：手寫自訂訓練迴圈 ➔ PyTorch 權重凍結、LoRA 矩陣動態注入與 TensorBoard 觀測。模組五：DPO 偏好對齊 ➔ 純手寫 $L_{DPO}$ 損失函數與矩陣對數機率運算。模組六：Continued Pre-Training 大文本吞吐 ➔ 手寫 Packing 演算法與 IterableDataset 流式加載。模組七：工業級 MLOps 觀測與自動化驗證 ➔ 一鍵 E2E 全生命周期管線回歸測試與 CI/CD-Ready 驗證。🛡️ 4. 邊界破壞測試與防禦表現 (Destructive Testing)本架構在進入耗費算力的訓練迴圈前，會由 src/config/schema.py 進行嚴格的攔截：LoRA Rank 校驗： 若 $r$ 非 2 的冪次方（如設定為 7），系統立即引發 ValidationError 拋出錯誤並中斷程序。學習率邊界校驗： 嚴格限制學習率區間於 [1e-6, 1e-2] 之間，徹底杜絕因筆誤導致初期權重 NaN 的算力浪費。
+
+
+⚙️ 3. 快速開始與安裝 (Installation)
+
+3.1 開發環境建置
+
+本專案建議使用 Python 3.10 以上之環境。請在乾淨的虛擬環境中執行以下指令安裝核心依賴：
+
+pip install -r requirements.txt
+
+
+3.2 執行環境自我檢查 (Sanity Check)
+
+在啟動程序前，可透過以下指令快速驗證本地 PyTorch 加速晶片與系統核心狀態：
+
+python -c "import torch, psutil; print('--- Hardware Status ---'); print('MPS Available:', torch.backends.mps.is_available()); print('Physical Cores:', psutil.cpu_count(logical=False))"
+
+
+3.3 執行組態核心
+
+執行 main.py 以啟動 Hydra 階層組態解析並通過 Pydantic 的安全防禦閘門：
+
+python main.py
+
+
+若欲在命令列中動態覆蓋超參數進行實驗，可直接追加引數（無需修改 YAML 實體檔案）：
+
+python main.py hparams.lr=1e-4 hparams.r=16
+
+
+🗺️ 4. 7大實作模組藍圖 (Roadmap)
+
+本專案隨著 84 小時衝刺進度，依序將以下 7 大核心模組落實於 src/ 中：
+
+模組一：動態組態與型態安全架構 (Done)
+
+實作 Hydra 階層 YAML 覆蓋、Pydantic v2 BaseSettings 超參數邊界防禦與 Apple Silicon 執行期實體執行緒限制。
+
+模組二：多核心加速 Data Curation 管道
+
+使用 Python 多處理器並行洗滌文本，並實作手寫 MinHash + LSH 百萬級海量數據去重。
+
+模組三：非同步自動化基準測試引擎
+
+使用 Python asyncio 實作非同步高併發外部 LLM-as-a-Judge 盲測與自動化 Markdown 差異報告導出。
+
+模組四：手寫 PyTorch + MPS 訓練迴圈
+
+捨棄高階訓練器，自定義客製化 Training Loop，實作梯度累積 (Gradient Accumulation) 與 LoRA 權重 Merge 邏輯。
+
+模組五：DPO 數據管道與損失函數實作
+
+偏好數據結構校驗，純手寫 $L_{DPO}$ 損失函數與矩陣對數機率運算。
+
+模組六：Continued Pre-Training 大文本吞吐
+
+手寫工業級 Packing 打包演算法消除 Padding 浪費，並整合 IterableDataset 實作 Streaming 加載防止記憶體過載。
+
+模組七：工業級 MLOps 觀測與自動化驗證
+
+手寫迴圈原生對接 WandB 指標追蹤，並撰寫一鍵式端到端生命週期整合測試 (test_e2e_lifecycle.py)。
