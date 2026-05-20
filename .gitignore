@@ -18,3 +18,5 @@ out/
 .env
 .env.local
 *.log
+.venv/
+.venv/

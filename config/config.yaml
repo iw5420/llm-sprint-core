@@ -1,0 +1,7 @@
+defaults:
+  - hparams: ryan_lora
+  - env: dev
+  - _self_
+
+project_name: "llm-lifecycle-sprint"
+debug: true
