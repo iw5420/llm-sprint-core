@@ -1,0 +1,9 @@
+hparams:
+  r: 8
+  alpha: 16
+  lr: 5.0e-05
+  max_seq_len: 2048
+env:
+  debug: true
+project_name: llm-lifecycle-sprint
+debug: true

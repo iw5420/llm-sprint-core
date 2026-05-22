@@ -1,0 +1,3 @@
+[tool.pytest.ini_options]
+# 強制將專案根目錄下的 src 加入到 Python 搜尋路徑中
+pythonpath = ["."]

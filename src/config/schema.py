@@ -10,6 +10,7 @@ class HyperParametersSchema(BaseModel):
     alpha: int = Field(..., description="LoRA 縮放因子常數 Scaling Factor")
     lr: float = Field(..., description="優化器初始學習率")
     max_seq_len: int = Field(..., description="最大上下文 Token 輸入長度")
+    num_perm: int = Field(default=128, description="MinHash 雜湊置換次數")
 
     @field_validator("r")
     @classmethod
