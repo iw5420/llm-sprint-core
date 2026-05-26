@@ -1,0 +1,16 @@
+env:
+  debug: true
+  PROVIDER_TYPE: ${oc.env:PROVIDER_TYPE}
+  PROVIDER_API_KEY: ${oc.env:PROVIDER_API_KEY}
+  EVAL_API_URL: ${oc.env:EVAL_API_URL}
+hparams:
+  r: 8
+  alpha: 16
+  lr: 5.0e-05
+  max_seq_len: 2048
+  num_perm: 128
+  num_bands: 32
+  max_concurrent_tasks: 1
+  api_timeout_seconds: 45.0
+  eval_model: gemini-2.0-flash
+project_name: llm-sprint-core-pipeline

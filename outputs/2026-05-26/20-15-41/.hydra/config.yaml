@@ -1,0 +1,14 @@
+hparams:
+  r: 8
+  alpha: 16
+  lr: 5.0e-05
+  max_seq_len: 2048
+  num_perm: 128
+  num_bands: 32
+  max_concurrent_tasks: 20
+  api_timeout_seconds: 30.0
+  eval_model: gpt-4o-mini
+env:
+  debug: true
+project_name: llm-lifecycle-sprint
+debug: true

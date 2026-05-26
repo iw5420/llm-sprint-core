@@ -1,7 +1,12 @@
 defaults:
-  - hparams: ryan_lora
   - env: dev
+  - hparams: ryan_lora
   - _self_
 
-project_name: "llm-lifecycle-sprint"
-debug: true
+project_name: "llm-sprint-core-pipeline"
+
+# 橫向串接安全防禦：透過 Hydra 將本地環境變數安全對齊進 YAML 組態樹
+env:
+  PROVIDER_TYPE: "${oc.env:PROVIDER_TYPE}"
+  PROVIDER_API_KEY: "${oc.env:PROVIDER_API_KEY}"
+  EVAL_API_URL: "${oc.env:EVAL_API_URL}"

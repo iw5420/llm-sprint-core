@@ -18,6 +18,7 @@ def main(cfg: DictConfig) -> None:
     workers = validated_config.optimal_threads 
     device_type = validated_config.device  # 👈 這裡動態拿到 "mps", "cuda" 或 "cpu"
     perms = validated_config.hparams.num_perm
+    bands = validated_config.hparams.num_bands
 
     # 2. 生成模擬私有文本語料庫（引入動態流水號，製造相異特徵）
     print("生成模擬私有文本語料庫中...")
@@ -32,7 +33,11 @@ def main(cfg: DictConfig) -> None:
 
     # 3. 執行清洗去重管線
     start_time = time.time()
-    pipeline = DataCurationPipeline(num_workers=workers, num_perm=perms)
+    pipeline = DataCurationPipeline(
+      num_workers=workers,
+      num_perm=perms,
+      num_bands=bands
+    ) 
     clean_data = pipeline.execute(mock_data)
     elapsed = time.time() - start_time
     

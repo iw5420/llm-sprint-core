@@ -3,7 +3,7 @@ import mmh3
 from typing import List, Set, Dict, Tuple
 
 class MinHashLSH:
-    def __init__(self, num_perm: int = 128, num_bands: int = 32):
+    def __init__(self, num_perm: int, num_bands: int):
         self.num_perm = num_perm
         self.b = num_bands
         self.r = num_perm // num_bands

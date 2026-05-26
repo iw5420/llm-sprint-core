@@ -2,3 +2,10 @@ r: 8
 alpha: 16
 lr: 5e-5
 max_seq_len: 2048
+num_perm: 128
+num_bands: 32
+
+# ==== 模組三：通用非同步評估超參數 ====
+max_concurrent_tasks: 1   # Asyncio Semaphore 控流看門狗（配合 Gemini 免費級 RPM=15 建議設 2~5）
+api_timeout_seconds: 45.0  # 單次 API 呼叫超時中斷線
+eval_model: "gemini-3.5-flash" # 裁判模型識別碼 (可自由切換為 gpt-4o-mini, claud-3-haiku 等)
