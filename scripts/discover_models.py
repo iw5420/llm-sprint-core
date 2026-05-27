@@ -45,6 +45,30 @@ def parse_model_version(model_id: str) -> float:
     return 0.0
 
 
+def _calculate_report_layout(parsed_models: list) -> tuple[str, str, str, str]:
+    """
+    單一職責專用方法：動態計算最長模型 ID 欄位，並產出高度適配的輸出樣板與邊框線。
+    返回: (row_template, header_template, border_line, equal_line)
+    """
+    # 基礎欄位對齊基準（對應 '模型實體識別碼 (Model ID)' 字串的最小視覺對齊長度）
+    min_width = 28
+
+    # 榨取出目前整批資料中最長的模型 ID 長度
+    max_id_len = max([len(item["id"]) for item in parsed_models] + [min_width])
+
+    # 動態建構字串對齊樣板物件 (Format String Factory)
+    row_template = f"   {{:<{max_id_len}}} | {{:<8}} | {{}}"
+    header_template = f"{{:<{max_id_len + 3}}} | {{:<8}} | {{}}"
+
+    # 精確度量總體輸出寬度，確保 CLI 線條 100% 等寬對齊不溢出
+    # 計算公式：max_id_len + 左側空格(3) + 間隔符與空格(3) + 版號欄位(8) + 間隔符與空格(3) + 狀態欄位寬度(16)
+    total_width = max_id_len + 3 + 3 + 8 + 3 + 16
+    border_line = "-" * total_width
+    equal_line = "=" * total_width
+
+    return row_template, header_template, border_line, equal_line
+
+
 def query_gemini_models(api_key: str) -> None:
     """
     呼叫 Google AI Studio 官方模型探測端點，動態計算並推薦目前雲端版號最高的最優模型。
@@ -62,15 +86,10 @@ def query_gemini_models(api_key: str) -> None:
             print("⚠️  成功連線，但雲端未傳回任何可用模型清單。")
             return
 
-        valid_flash_models = []
-        valid_pro_models = []
-
-        print("\n====================================================================================")
-        print("🎯 Gemini 雲端活動模型實時解析大盤（100% 前向相容，杜絕字串硬編碼）")
-        print("====================================================================================")
-        print(f"{'模型實體識別碼 (Model ID)':<38} | {'提取版號':<8} | {'結構化 JSON 支援':<16}")
-        print("------------------------------------------------------------------------------------")
-
+        # ====================================================================================
+        # 🌟 第一階段：預解析資料集 (Pass 1 - Raw Data Cleanse)
+        # ====================================================================================
+        parsed_models = []
         for model in models_list:
             model_id = model.get("name", "").split("/")[-1]
             methods = model.get("supportedGenerationMethods", [])
@@ -79,17 +98,50 @@ def query_gemini_models(api_key: str) -> None:
             if "generateContent" not in methods:
                 continue
 
-            # 🔍 剛需守門員 2：排除語音、影像、機器人等無法穩定輸出標準結構化 JSON 的 Specialist 模型
+            # 🔍 剛需守門員 2：評估是否為 Specialist 模型
             is_specialist = any(x in model_id for x in ["image", "tts", "robotics", "clip", "nano", "preview"])
-            if is_specialist:
-                print(f"   {model_id:<35} | {'N/A':<8} | 🟡 需測試防禦")
+            version = parse_model_version(model_id)
+
+            parsed_models.append({
+                "id": model_id,
+                "is_specialist": is_specialist,
+                "version": version
+            })
+
+        if not parsed_models:
+            print("⚠️  成功過濾，但查無任何符合主線文字生成條件的模型。")
+            return
+
+        # ====================================================================================
+        # 🌟 第二階段：調用佈局計算方法，動態產出對齊樣板 (Layout Generation)
+        # ====================================================================================
+        row_template, header_template, border_line, equal_line = _calculate_report_layout(parsed_models)
+
+        valid_flash_models = []
+        valid_pro_models = []
+
+        print(f"\n{equal_line}")
+        print("🎯 Gemini 雲端活動模型實時解析大盤（100% 前向相容，杜絕字串硬編碼）")
+        print(equal_line)
+        print(header_template.format("模型實體識別碼 (Model ID)", "提取版號", "結構化 JSON 支援"))
+        print(border_line)
+
+        # ====================================================================================
+        # 🌟 第三階段：渲染標準化動態 CLI 報表與推導 (Pass 2 - Render & Heap Sort)
+        # ====================================================================================
+        for item in parsed_models:
+            model_id = item["id"]
+
+            # 處理無法穩定輸出標準結構化 JSON 的 Specialist 模型
+            if item["is_specialist"]:
+                print(row_template.format(model_id, "N/A", "🟡 需測試防禦"))
                 continue
 
-            # 🔍 核心自適應演算法：動態計算語義版號
-            version = parse_model_version(model_id)
+            # 核心自適應演算法：動態計算語義版號
+            version = item["version"]
             if version > 0.0:
                 json_support = "🟢 完美相容"
-                print(f"   {model_id:<35} | {version:<8} | {json_support:<16}")
+                print(row_template.format(model_id, version, json_support))
 
                 # 依據架構流派，將主線推理模型分流，準備進行最大值篩選
                 if "flash" in model_id:
@@ -97,7 +149,7 @@ def query_gemini_models(api_key: str) -> None:
                 elif "pro" in model_id:
                     valid_pro_models.append((version, model_id))
 
-        print("------------------------------------------------------------------------------------")
+        print(border_line)
 
         # 🌟 終極自動推導最優解：利用 Max-Heap 篩選，自動抓取目前雲端存在的最高數字模型！
         if valid_flash_models:
@@ -112,9 +164,9 @@ def query_gemini_models(api_key: str) -> None:
         else:
             best_pro = "gemini-1.5-pro"
 
-        print("====================================================================================")
+        print(equal_line)
         print(f"💡 [架構師提示] 複製動態推導出的最高版號 '{best_flash}'，填入 YAML 即可。未來無論出 4.0 或 4.5，本腳本永不崩潰！")
-        print("====================================================================================\n")
+        print(f"{equal_line}\n")
 
     except requests.exceptions.HTTPError as e:
         if e.response.status_code == 400:

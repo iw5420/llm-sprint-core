@@ -6,6 +6,7 @@ Author: Ace (Lead Architect)
 
 import asyncio
 import aiohttp
+import json
 from typing import List, Dict
 from src.evaluation.metrics import MetricsCalculator
 from src.evaluation.judge import AsyncLLMJudge
@@ -49,6 +50,11 @@ class EvaluationPipeline:
             base_metrics = {"rouge1": 0.0, "rouge2": 0.0, "rougeL": 0.0, "bleu": 0.0, "em": 0.0}
             ft_metrics = self.metrics_calc.compute_string_metrics(reference=base_res, hypothesis=ft_res)
 
+        print(f"\n🔍 [Case ONDEMAND OPTICAL] 案例 ID: {case_id} 指標流對比:")
+        print("--- Baseline Metrics ---")
+        print(json.dumps(base_metrics, indent=4, ensure_ascii=False))
+        print("--- Fine-tuned Metrics ---")
+        print(json.dumps(ft_metrics, indent=4, ensure_ascii=False))
         # 序列化呼叫裁判，徹底拔除 429 轟炸併發
         judge_base = await self.judge.evaluate_single_case(session, prompt, base_res)
 
