@@ -19,4 +19,9 @@ out/
 .env.local
 *.log
 .venv/
-.venv/
+
+log/
+checkpoints/
+*.pt
+*.json
+
