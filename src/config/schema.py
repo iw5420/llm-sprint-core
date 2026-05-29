@@ -27,6 +27,20 @@ class HyperParametersSchema(BaseModel):
     api_timeout_seconds: float = Field(..., ge=5.0, description="外部 API 呼叫安全超時秒數")
     eval_model: str = Field(..., description="外部通用裁判模型的實體名稱")
 
+    # ==== 模組四增量防禦欄位 ====
+    epochs: int = Field(..., ge=1, description="總訓練輪數")
+    batch_size: int = Field(..., ge=1, description="實體傳播 Mini-Batch 大小")
+    gradient_accumulation_steps: int = Field(..., ge=1, description="梯度累積虛擬放大步數")
+    max_grad_norm: float = Field(..., gt=0.0, description="範數梯度裁剪上限")
+    save_dir: str = Field(..., description="權重檢置點儲存目錄")
+
+    @field_validator("gradient_accumulation_steps")
+    @classmethod
+    def validate_accumulation(cls, v: int) -> int:
+        if v > 64:
+            raise ValueError(f"梯度累積步數過大 ({v})，將導致訓練動態更新極其遲緩，建議限制於 64 以下。")
+        return v
+
     @field_validator("r")
     @classmethod
     def validate_rank(cls, v: int) -> int:
