@@ -7,9 +7,12 @@ num_bands: 32
 max_concurrent_tasks: 1
 api_timeout_seconds: 45.0
 eval_model: "gemini-3.5-flash"
-# ==== 模組四：跨平台手寫 PyTorch 訓練超參數 ====
 epochs: 3
-batch_size: 2                # 本地單次前向傳播實體小 Batch Size（防爆關鍵）
-gradient_accumulation_steps: 4 # 累積步數。實質等效有效 Batch Size = 2 * 4 = 8
-max_grad_norm: 1.0           # 梯度裁剪（Gradient Clipping）安全閾值
-save_dir: "./checkpoints"    # LoRA 權重儲存實體路徑
+batch_size: 2
+gradient_accumulation_steps: 4
+max_grad_norm: 1.0
+save_dir: "./checkpoints"
+dpo_beta: 0.1
+# ==== 模組六：工業級 Packing 與 Streaming 超參數 ====
+eos_token_id: 2              # 文本拼接的拼接符標記 (例如 <|endoftext|> ID)
+chunk_buffer_size: 1000      # 流式讀取文本的緩衝行數，用以平衡內存與 I/O 頻寬

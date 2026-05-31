@@ -17,22 +17,36 @@ class EnvConfigSchema(BaseModel):
 
 class HyperParametersSchema(BaseModel):
     """跨模組演算法與實驗超參數安全邊界校驗"""
-    r: int = Field(..., description="LoRA Rank 階數")
-    alpha: int = Field(..., description="LoRA 縮放因子常數")
+    # ... 保持模組一至四參數不變 ...
+    r: int = Field(..., description="LoRA 內部的低秩矩陣 Rank 階數")
+    alpha: int = Field(..., description="LoRA 縮放因子常數 Scaling Factor")
     lr: float = Field(..., description="優化器初始學習率")
-    max_seq_len: int = Field(..., description="最大上下文 Token 輸入長度")
+    max_seq_len: int = Field(..., ge=128, le=8192, description="最大上下文 Token 輸入長度 (Packing Block Size)")
     num_perm: int = Field(..., ge=1, description="MinHash 雜湊置換次數")
-    num_bands: int = Field(..., ge=1, description="LSH 雜湊桶區段數")
-    max_concurrent_tasks: int = Field(..., ge=1, le=100, description="最大非同步並發 API 數量")
-    api_timeout_seconds: float = Field(..., ge=5.0, description="外部 API 呼叫安全超時秒數")
-    eval_model: str = Field(..., description="外部通用裁判模型的實體名稱")
-
-    # ==== 模組四增量防禦欄位 ====
+    num_bands: int = Field(..., ge=1, description="LSH 雜湊桶區段數 (Bands)")
     epochs: int = Field(..., ge=1, description="總訓練輪數")
     batch_size: int = Field(..., ge=1, description="實體傳播 Mini-Batch 大小")
     gradient_accumulation_steps: int = Field(..., ge=1, description="梯度累積虛擬放大步數")
     max_grad_norm: float = Field(..., gt=0.0, description="範數梯度裁剪上限")
     save_dir: str = Field(..., description="權重檢置點儲存目錄")
+    dpo_beta: float = Field(..., gt=0.0, le=1.0, description="DPO 損失函數中的 KL 懲罰係數 Beta")
+    # ==== 模組六增量防禦欄位 ====
+    eos_token_id: int = Field(..., ge=0, description="End-of-text 終止標記 Token ID")
+    chunk_buffer_size: int = Field(..., ge=10, description="流式緩衝區的最大行數限制")
+
+    @field_validator("max_seq_len")
+    @classmethod
+    def validate_power_of_two(cls, v: int) -> int:
+        if (v & (v - 1)) != 0:
+            raise ValueError(f"為了最大化硬體 Tensor Core 的對齊排程效率，max_seq_len ({v}) 必須為 2 的冪次方。")
+        return v
+
+    @field_validator("dpo_beta")
+    @classmethod
+    def validate_dpo_beta(cls, v: float) -> float:
+        if v < 0.01:
+            raise ValueError(f"DPO Beta 設置過小 ({v})，將導致隱式獎勵過度震盪，無法穩定拉開偏好差距。")
+        return v
 
     @field_validator("gradient_accumulation_steps")
     @classmethod
